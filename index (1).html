@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FitCoach Platform — ER Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #fff;
+    padding: 40px 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 24px; color: #111; }
+
+  .erd-wrapper {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px 16px;
+    overflow-x: auto;
+    background: #fafafa;
+  }
+  #erd svg { width: 100%; height: auto; }
+
+  .legend-row { display: flex; justify-content: flex-end; margin-top: 10px; position: relative; }
+  .legend-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc;
+    background: white; color: #555; font-size: 14px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .legend-btn:hover { background: #f0f0f0; }
+  .legend-btn .tooltip {
+    display: none; position: absolute; right: 34px; top: 50%; transform: translateY(-50%);
+    background: #333; color: #fff; font-size: 11px; font-weight: 400;
+    white-space: nowrap; padding: 4px 10px; border-radius: 4px; pointer-events: none;
+  }
+  .legend-btn:hover .tooltip { display: block; }
+
+  dialog {
+    border: 1px solid #ddd; border-radius: 10px; padding: 28px 32px;
+    max-width: 480px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+  dialog::backdrop { background: rgba(0,0,0,0.35); }
+  dialog h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: #111; }
+  .close-btn { float: right; background: none; border: none; font-size: 18px; cursor: pointer; color: #888; line-height: 1; margin-top: -2px; }
+  .legend-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 4px; }
+  .legend-table th { text-align: left; padding: 6px 10px; background: #f5f5f5; border-bottom: 1px solid #e0e0e0; font-weight: 600; color: #333; }
+  .legend-table td { padding: 7px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; color: #444; }
+  .legend-table tr:last-child td { border-bottom: none; }
+  .mono { font-family: monospace; font-size: 12px; background: #f0f0f0; padding: 1px 5px; border-radius: 3px; }
+
+  .divider { height: 1px; background: #e8e8e8; margin: 52px 0; }
+
+  .entity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 28px; }
+  .entity-card { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+  .entity-card-head { padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .entity-card-name { font-size: 0.9rem; font-weight: 700; }
+  .entity-card-type { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; border: 1px solid currentColor; opacity: 0.7; }
+  .entity-card-body { padding: 14px 16px; background: white; }
+  .entity-card-desc { font-size: 0.875rem; color: #555; margin-bottom: 12px; line-height: 1.55; }
+  .attr-list { list-style: none; }
+  .attr-list li { font-family: monospace; font-size: 0.8rem; color: #666; padding: 3px 0; border-bottom: 1px dashed #eee; display: flex; align-items: center; gap: 6px; }
+  .attr-list li:last-child { border-bottom: none; }
+  .badge-pk { font-size: 8px; padding: 1px 5px; border-radius: 3px; background: #2563a8; color: white; font-weight: 600; flex-shrink: 0; }
+  .badge-fk { font-size: 8px; padding: 1px 5px; border-radius: 3px; background: #2a7c6b; color: white; font-weight: 600; flex-shrink: 0; }
+
+  .head-blue   { background: #e8f0fb; color: #1a3f6e; }
+  .head-teal   { background: #d0ede8; color: #1a5c4f; }
+  .head-purple { background: #e8e4f5; color: #3d2f6e; }
+  .head-amber  { background: #fef3d0; color: #6b4400; }
+  .head-green  { background: #e4f2db; color: #2a5018; }
+  .head-muted  { background: #f0f0f0; color: #444; }
+  .head-coral  { background: #fdecea; color: #7a2a1e; }
+  .head-rose   { background: #fce8ef; color: #7a1a3a; }
+
+  .qa-list { margin-top: 28px; }
+  .qa-item { display: grid; grid-template-columns: 28px 1fr; gap: 16px; padding: 20px 0; border-bottom: 1px solid #eee; }
+  .qa-item:last-child { border-bottom: none; }
+  .qa-num { font-size: 1.1rem; font-weight: 700; color: #ccc; padding-top: 2px; }
+  .qa-q { font-weight: 600; color: #111; margin-bottom: 6px; font-size: 0.97rem; }
+  .qa-a { font-size: 0.93rem; color: #444; line-height: 1.7; }
+
+  h2.section-title { font-size: 1.1rem; font-weight: 600; color: #111; }
+</style>
+</head>
+<body>
+
+<h1>FitCoach Platform — ER Diagram</h1>
+
+<div class="erd-wrapper">
+  <div id="erd"></div>
+</div>
+
+<div class="legend-row">
+  <button class="legend-btn" onclick="document.getElementById('legend-dialog').showModal()">
+    ?
+    <span class="tooltip">Diagram legend</span>
+  </button>
+</div>
+
+<dialog id="legend-dialog">
+  <button class="close-btn" onclick="document.getElementById('legend-dialog').close()">&#x2715;</button>
+  <h2>Diagram Legend</h2>
+  <table class="legend-table">
+    <thead><tr><th>Symbol / Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mono">PK</span></td><td>Primary Key — unique ID for each row in this table</td></tr>
+      <tr><td><span class="mono">FK</span></td><td>Foreign Key — references the PK of another table</td></tr>
+      <tr><td><span class="mono">||--||</span></td><td>Exactly one to exactly one</td></tr>
+      <tr><td><span class="mono">||--o{</span></td><td>One to zero or many</td></tr>
+      <tr><td><span class="mono">||--|{</span></td><td>One to one or many (at least one required)</td></tr>
+      <tr><td><span class="mono">||--o|</span></td><td>One to zero or one (optional)</td></tr>
+      <tr><td>Rectangle</td><td>Entity — becomes a table in the database</td></tr>
+      <tr><td>Junction table</td><td>Resolves a many-to-many relationship (e.g. CLIENT_PLAN)</td></tr>
+    </tbody>
+  </table>
+</dialog>
+
+<div class="divider"></div>
+
+<h2 class="section-title">What Each Table Does</h2>
+
+<div class="entity-grid">
+
+  <div class="entity-card">
+    <div class="entity-card-head head-blue">
+      <span class="entity-card-name">User</span>
+      <span class="entity-card-type">Core</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">Shared identity record for every person on the platform — trainers and clients alike. Role distinguishes between them. Keeping a single User table avoids duplicating name, email, and auth fields across two separate tables.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> user_id</li>
+        <li>full_name</li>
+        <li>email</li>
+        <li>phone</li>
+        <li>role</li>
+        <li>joined_at</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-blue">
+      <span class="entity-card-name">Trainer_Profile</span>
+      <span class="entity-card-type">Core</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">Extended profile for users who are trainers. Stores trainer-specific fields like specialization, bio, and years of experience. Linked 1-to-1 with User so trainer data stays separate from client data without bloating the core User table.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> trainer_id</li>
+        <li><span class="badge-fk">FK</span> user_id</li>
+        <li>specialization</li>
+        <li>bio</li>
+        <li>experience_years</li>
+        <li>instagram_handle</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-blue">
+      <span class="entity-card-name">Client_Profile</span>
+      <span class="entity-card-type">Core</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">Extended profile for users who are clients. Holds health baseline data — age, gender, height, initial weight, fitness goal — captured at onboarding. Separate from User so this context never pollutes auth or contact fields.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> client_id</li>
+        <li><span class="badge-fk">FK</span> user_id</li>
+        <li>date_of_birth</li>
+        <li>gender</li>
+        <li>height_cm</li>
+        <li>initial_weight_kg</li>
+        <li>fitness_goal</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-teal">
+      <span class="entity-card-name">Coaching_Plan</span>
+      <span class="entity-card-type">Product</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">A plan or program that the trainer creates and offers — e.g., "12-Week Fat Loss", "Muscle Building Starter". Stores duration, price, plan type (workout-only, diet-only, combined), and which trainer owns it. Many clients can subscribe to the same plan.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> plan_id</li>
+        <li><span class="badge-fk">FK</span> trainer_id</li>
+        <li>title</li>
+        <li>description</li>
+        <li>plan_type</li>
+        <li>duration_weeks</li>
+        <li>price</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-teal">
+      <span class="entity-card-name">Subscription</span>
+      <span class="entity-card-type">Junction</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">Records that a specific client enrolled in a specific plan. Tracks start date, end date, and current status (active, completed, cancelled). This is the central joining point — it links client ↔ plan and also anchors sessions, check-ins, and progress records.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> subscription_id</li>
+        <li><span class="badge-fk">FK</span> client_id</li>
+        <li><span class="badge-fk">FK</span> plan_id</li>
+        <li>start_date</li>
+        <li>end_date</li>
+        <li>status</li>
+        <li>enrolled_at</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-amber">
+      <span class="entity-card-name">Session</span>
+      <span class="entity-card-type">Transaction</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">A scheduled live interaction — video call, consultation, or group session. Not the same as a check-in. A session has a fixed time slot, a medium (Zoom, Meet, phone), and a status (scheduled, completed, cancelled). Linked to both trainer and client.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> session_id</li>
+        <li><span class="badge-fk">FK</span> trainer_id</li>
+        <li><span class="badge-fk">FK</span> client_id</li>
+        <li><span class="badge-fk">FK</span> subscription_id</li>
+        <li>scheduled_at</li>
+        <li>duration_min</li>
+        <li>medium</li>
+        <li>status</li>
+        <li>notes</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-green">
+      <span class="entity-card-name">CheckIn</span>
+      <span class="entity-card-type">Transaction</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">A weekly self-report submitted by the client — not a live session. Captures how the client felt that week: energy level, sleep, diet adherence, workout completion. Separate from Session and from Progress so each concern stays clean and queryable independently.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> checkin_id</li>
+        <li><span class="badge-fk">FK</span> subscription_id</li>
+        <li><span class="badge-fk">FK</span> client_id</li>
+        <li>submitted_at</li>
+        <li>energy_level</li>
+        <li>sleep_quality</li>
+        <li>diet_adherence</li>
+        <li>workout_completed</li>
+        <li>client_notes</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-green">
+      <span class="entity-card-name">Trainer_Feedback</span>
+      <span class="entity-card-type">Operational</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">Trainer's written response to a client's check-in. Stored separately so feedback can be created asynchronously after the check-in is reviewed. One check-in can have at most one feedback record. This keeps trainer notes out of both the check-in and the progress table.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> feedback_id</li>
+        <li><span class="badge-fk">FK</span> checkin_id</li>
+        <li><span class="badge-fk">FK</span> trainer_id</li>
+        <li>feedback_text</li>
+        <li>plan_adjustment</li>
+        <li>given_at</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-purple">
+      <span class="entity-card-name">Progress_Entry</span>
+      <span class="entity-card-type">Analytics</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">Objective measurement record — weight, body fat %, and key body measurements logged over time. One entry per measurement date per client. Kept separate from check-ins (which are subjective) and from the client profile (which holds only the initial baseline).</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> progress_id</li>
+        <li><span class="badge-fk">FK</span> client_id</li>
+        <li><span class="badge-fk">FK</span> subscription_id</li>
+        <li>recorded_at</li>
+        <li>weight_kg</li>
+        <li>body_fat_pct</li>
+        <li>chest_cm</li>
+        <li>waist_cm</li>
+        <li>hips_cm</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-coral">
+      <span class="entity-card-name">Payment</span>
+      <span class="entity-card-type">Financial</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">Records each payment transaction tied to a subscription. A subscription may have multiple payments if it's a recurring billing model. Stores amount, method (UPI, card, bank transfer), and payment status. Keeps financial data fully separate from plan and client records.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> payment_id</li>
+        <li><span class="badge-fk">FK</span> subscription_id</li>
+        <li><span class="badge-fk">FK</span> client_id</li>
+        <li>amount</li>
+        <li>payment_method</li>
+        <li>payment_status</li>
+        <li>paid_at</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-rose">
+      <span class="entity-card-name">Diet_Plan</span>
+      <span class="entity-card-type">Content</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">A custom diet plan created by a trainer for a specific client under a subscription. Stores calorie targets, macro breakdown, and meal timing notes. Separate from Coaching_Plan (which is the product) so that nutrition content can be updated without changing the subscription record.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> diet_plan_id</li>
+        <li><span class="badge-fk">FK</span> subscription_id</li>
+        <li><span class="badge-fk">FK</span> trainer_id</li>
+        <li>title</li>
+        <li>daily_calories</li>
+        <li>protein_g</li>
+        <li>carbs_g</li>
+        <li>fats_g</li>
+        <li>notes</li>
+        <li>created_at</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="entity-card">
+    <div class="entity-card-head head-rose">
+      <span class="entity-card-name">Workout_Plan</span>
+      <span class="entity-card-type">Content</span>
+    </div>
+    <div class="entity-card-body">
+      <p class="entity-card-desc">A custom workout routine assigned to a client under a subscription. Stores the training split, frequency, and any special instructions. Kept separate from Diet_Plan and Coaching_Plan so workout content can evolve independently across the subscription period.</p>
+      <ul class="attr-list">
+        <li><span class="badge-pk">PK</span> workout_plan_id</li>
+        <li><span class="badge-fk">FK</span> subscription_id</li>
+        <li><span class="badge-fk">FK</span> trainer_id</li>
+        <li>title</li>
+        <li>training_split</li>
+        <li>days_per_week</li>
+        <li>notes</li>
+        <li>created_at</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<h2 class="section-title">Business Questions Answered by This Design</h2>
+
+<div class="qa-list">
+
+  <div class="qa-item">
+    <div class="qa-num">1</div>
+    <div>
+      <p class="qa-q">Who are the trainers and who are the clients?</p>
+      <p class="qa-a">Both live in the <span class="mono">USER</span> table, differentiated by the <span class="mono">role</span> column. Trainers have a corresponding <span class="mono">TRAINER_PROFILE</span> row with their specialization and bio; clients have a <span class="mono">CLIENT_PROFILE</span> row with their health baseline. This single-table-with-profiles pattern avoids duplicating name and email fields.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">2</div>
+    <div>
+      <p class="qa-q">What coaching programs exist and which trainer owns them?</p>
+      <p class="qa-a"><span class="mono">COACHING_PLAN</span> stores all programs. Each plan has a <span class="mono">trainer_id FK</span> linking it to its creator via <span class="mono">TRAINER_PROFILE</span>. Filter by trainer_id to see all plans a specific trainer offers. The <span class="mono">plan_type</span> column distinguishes workout-only, diet-only, or combined programs.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">3</div>
+    <div>
+      <p class="qa-q">Which client purchased which plan, and when does it start and end?</p>
+      <p class="qa-a"><span class="mono">SUBSCRIPTION</span> is the central junction. It holds <span class="mono">client_id FK</span> and <span class="mono">plan_id FK</span> alongside <span class="mono">start_date</span>, <span class="mono">end_date</span>, and <span class="mono">status</span>. Query subscriptions filtered by client_id to see all plans a client has ever purchased, including past and active ones.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">4</div>
+    <div>
+      <p class="qa-q">Can multiple clients enroll in the same plan? Can one trainer handle many clients?</p>
+      <p class="qa-a">Yes on both. <span class="mono">COACHING_PLAN</span> to <span class="mono">SUBSCRIPTION</span> is one-to-many — many clients can subscribe to the same plan. <span class="mono">TRAINER_PROFILE</span> to <span class="mono">COACHING_PLAN</span> is also one-to-many — one trainer creates many plans, and through those plans handles many clients.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">5</div>
+    <div>
+      <p class="qa-q">Are consultations or live sessions being scheduled?</p>
+      <p class="qa-a"><span class="mono">SESSION</span> records every scheduled interaction. It links to both <span class="mono">trainer_id</span> and <span class="mono">client_id</span>, stores the <span class="mono">scheduled_at</span> timestamp, medium (Zoom, Meet, phone), and status. A session is optionally tied to a <span class="mono">subscription_id</span> — some sessions (standalone consultations) may exist without a long-term plan.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">6</div>
+    <div>
+      <p class="qa-q">Are clients submitting weekly check-ins? How is that different from sessions?</p>
+      <p class="qa-a">Check-ins are asynchronous self-reports in <span class="mono">CHECKIN</span> — the client fills in energy, sleep, diet adherence, and notes on their own schedule. Sessions are scheduled live calls in <span class="mono">SESSION</span>. They are deliberately separate tables so you can independently count how many check-ins a client submitted vs. how many live calls they attended.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">7</div>
+    <div>
+      <p class="qa-q">How are trainer notes and feedback stored?</p>
+      <p class="qa-a"><span class="mono">TRAINER_FEEDBACK</span> is linked to a specific <span class="mono">checkin_id</span> and <span class="mono">trainer_id</span>. This means feedback is a response to a check-in, created asynchronously. It stores <span class="mono">feedback_text</span> and a <span class="mono">plan_adjustment</span> note. Keeping it separate means the trainer can review the check-in first, then write feedback without locking the check-in record.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">8</div>
+    <div>
+      <p class="qa-q">How is client progress tracked over time?</p>
+      <p class="qa-a"><span class="mono">PROGRESS_ENTRY</span> stores objective measurements — weight, body fat %, and body measurements — each as a separate dated row. This is separate from <span class="mono">CLIENT_PROFILE</span> (which holds only the initial baseline) and from <span class="mono">CHECKIN</span> (which holds subjective weekly feelings). Query progress entries by client_id ordered by recorded_at to plot a progress chart.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">9</div>
+    <div>
+      <p class="qa-q">How are diet plans and workout plans modeled?</p>
+      <p class="qa-a"><span class="mono">DIET_PLAN</span> and <span class="mono">WORKOUT_PLAN</span> are separate content tables, each linked to a <span class="mono">subscription_id</span>. This means a trainer can update a client's nutrition guidance or training split mid-subscription without touching the subscription record or the coaching plan template. A combined-type subscription can have both; a diet-only subscription has only a diet plan.</p>
+    </div>
+  </div>
+
+  <div class="qa-item">
+    <div class="qa-num">10</div>
+    <div>
+      <p class="qa-q">How is payment and subscription billing stored?</p>
+      <p class="qa-a"><span class="mono">PAYMENT</span> links to <span class="mono">subscription_id</span> and <span class="mono">client_id</span>. A subscription can have multiple payment rows (for monthly billing cycles). Each payment records <span class="mono">amount</span>, <span class="mono">payment_method</span> (UPI, card, bank transfer), and <span class="mono">payment_status</span> (pending, paid, refunded). Financial history is fully preserved since payments are never overwritten.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: 'system-ui, sans-serif',
+  themeVariables: {
+    darkMode: false,
+    fontSize: '13px',
+    lineColor: '#888',
+    textColor: '#222',
+    primaryColor: '#e8f0fb',
+    primaryTextColor: '#1a3f6e',
+    primaryBorderColor: '#2563a8',
+    secondaryColor: '#d0ede8',
+    secondaryTextColor: '#1a5c4f',
+    secondaryBorderColor: '#2a7c6b',
+    tertiaryColor: '#f5f5f5',
+    tertiaryTextColor: '#444',
+    tertiaryBorderColor: '#ccc',
+  },
+});
+
+mermaid.render('erd-svg', `erDiagram
+  USER {
+    int user_id PK
+    string full_name
+    string email
+    string phone
+    string role
+    timestamp joined_at
+  }
+  TRAINER_PROFILE {
+    int trainer_id PK
+    int user_id FK
+    string specialization
+    string bio
+    int experience_years
+    string instagram_handle
+  }
+  CLIENT_PROFILE {
+    int client_id PK
+    int user_id FK
+    date date_of_birth
+    string gender
+    decimal height_cm
+    decimal initial_weight_kg
+    string fitness_goal
+  }
+  COACHING_PLAN {
+    int plan_id PK
+    int trainer_id FK
+    string title
+    string description
+    string plan_type
+    int duration_weeks
+    decimal price
+  }
+  SUBSCRIPTION {
+    int subscription_id PK
+    int client_id FK
+    int plan_id FK
+    date start_date
+    date end_date
+    string status
+    timestamp enrolled_at
+  }
+  SESSION {
+    int session_id PK
+    int trainer_id FK
+    int client_id FK
+    int subscription_id FK
+    timestamp scheduled_at
+    int duration_min
+    string medium
+    string status
+    string notes
+  }
+  CHECKIN {
+    int checkin_id PK
+    int subscription_id FK
+    int client_id FK
+    timestamp submitted_at
+    int energy_level
+    int sleep_quality
+    string diet_adherence
+    boolean workout_completed
+    string client_notes
+  }
+  TRAINER_FEEDBACK {
+    int feedback_id PK
+    int checkin_id FK
+    int trainer_id FK
+    string feedback_text
+    string plan_adjustment
+    timestamp given_at
+  }
+  PROGRESS_ENTRY {
+    int progress_id PK
+    int client_id FK
+    int subscription_id FK
+    timestamp recorded_at
+    decimal weight_kg
+    decimal body_fat_pct
+    decimal chest_cm
+    decimal waist_cm
+    decimal hips_cm
+  }
+  PAYMENT {
+    int payment_id PK
+    int subscription_id FK
+    int client_id FK
+    decimal amount
+    string payment_method
+    string payment_status
+    timestamp paid_at
+  }
+  DIET_PLAN {
+    int diet_plan_id PK
+    int subscription_id FK
+    int trainer_id FK
+    string title
+    int daily_calories
+    decimal protein_g
+    decimal carbs_g
+    decimal fats_g
+    string notes
+    timestamp created_at
+  }
+  WORKOUT_PLAN {
+    int workout_plan_id PK
+    int subscription_id FK
+    int trainer_id FK
+    string title
+    string training_split
+    int days_per_week
+    string notes
+    timestamp created_at
+  }
+
+  USER ||--o| TRAINER_PROFILE : has
+  USER ||--o| CLIENT_PROFILE : has
+  TRAINER_PROFILE ||--o{ COACHING_PLAN : creates
+  COACHING_PLAN ||--o{ SUBSCRIPTION : subscribed_via
+  CLIENT_PROFILE ||--o{ SUBSCRIPTION : enrolls_in
+  SUBSCRIPTION ||--o{ SESSION : includes
+  TRAINER_PROFILE ||--o{ SESSION : conducts
+  CLIENT_PROFILE ||--o{ SESSION : attends
+  SUBSCRIPTION ||--o{ CHECKIN : has
+  CLIENT_PROFILE ||--o{ CHECKIN : submits
+  CHECKIN ||--o| TRAINER_FEEDBACK : receives
+  TRAINER_PROFILE ||--o{ TRAINER_FEEDBACK : writes
+  CLIENT_PROFILE ||--o{ PROGRESS_ENTRY : tracks
+  SUBSCRIPTION ||--o{ PROGRESS_ENTRY : logged_under
+  SUBSCRIPTION ||--o{ PAYMENT : billed_via
+  CLIENT_PROFILE ||--o{ PAYMENT : pays
+  SUBSCRIPTION ||--o{ DIET_PLAN : has
+  TRAINER_PROFILE ||--o{ DIET_PLAN : creates
+  SUBSCRIPTION ||--o{ WORKOUT_PLAN : has
+  TRAINER_PROFILE ||--o{ WORKOUT_PLAN : creates
+`).then(({ svg }) => {
+  document.getElementById('erd').innerHTML = svg;
+});
+</script>
+</body>
+</html>
